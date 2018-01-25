@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	     xmlns:aop="http://www.springframework.org/schema/aop"
+	     xmlns:tx="http://www.springframework.org/schema/tx"
+	     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+
+<!-- 创建数据源 -->
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+	<property name="url" value="jdbc:mysql://localhost:3306/root"></property>
+	<property name="username" value="root"></property>
+	<property name="password" value="root"></property>
+	<property name="maxActive" value="100"></property>
+	<property name="maxIdle" value="30"></property>
+	<property name="maxWait" value="500"></property>
+	<property name="defaultAutoCommit" value="true"></property>
+</bean>
+
+<!-- 创建sessionfactory -->
+<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+	<property name="dataSource" ref="dataSource"></property>
+	<property name="hibernateProperties">
+		<props>
+			<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+			<prop key="hibernate.show_sql">true</prop>
+		</props>
+	</property>
+	<property name="mappingResources">
+		<list>
+			<value>com/test/bean/User.hbm.xml</value>
+		</list>
+	</property>
+</bean>
+
+<!-- 创建dao -->
+<bean id="userDao" class="com.test.dao.impl.UserDAOImpl" scope="singleton">
+	<property name="sessionFactory">
+		<ref bean="sessionFactory"/>
+	</property>
+</bean>
+
+<!-- 创建service -->
+<bean id="userService" class="com.test.service.impl.UserServiceImpl">
+	<property name="userDao" ref="userDao"></property>
+</bean>
+
+<!-- 以下为创建各个action的bean -->
+<bean id="saveUserAction" class="com.test.action.user.SaveUserAction" scope="prototype">
+	<property name="service" ref="userService"></property>
+</bean>
+
+<bean id="listUserAction" class="com.test.action.user.ListUserAction" scope="prototype">
+	<property name="service" ref="userService"></property>
+</bean>
+
+<bean id="removeUserAction" class="com.test.action.user.RemoveUserAction" scope="prototype">
+	<property name="service" ref="userService"></property>
+</bean>
+
+<bean id="updatePUserAction" class="com.test.action.user.UpdatePUserAction" scope="prototype">
+	<property name="service" ref="userService"></property>
+</bean>
+
+<bean id="updateUserAction" class="com.test.action.user.UpdateUserAction" scope="prototype">
+	<property name="service" ref="userService"></property>
+</bean>
+
+<bean id="generateExcelAction" class="com.test.action.user.GenerateExcelAction" scope="singleton">
+	<property name="service" ref="userService"></property>
+</bean>
+
+
+</beans>
